@@ -23,15 +23,15 @@
       ansible.builtin.set_fact:
         rdr_app: "{{ values_clustergroup.clusterGroup.applications.rdr }}"
 
-    - name: Load rdr values yaml
-      ansible.builtin.set_fact:
-        rdr_values: "{{ lookup('file', pattern_dir + rdr_app.path + '/values.yaml') | from_yaml }}"
+    # - name: Load rdr values yaml
+    #   ansible.builtin.set_fact:
+    #     rdr_values: "{{ lookup('file', pattern_dir + rdr_app.path + '/values.yaml') | from_yaml }}"
 
     - name: Set byoc for the playbook
       ansible.builtin.set_fact:
         byoc_enabled: true
       when:
-        - ((rdr_app.overrides | default([]) | selectattr('name', 'eq', 'byoc')|first).value | default(false)) or (rdr_values.byoc)
+        - ((rdr_app.overrides | default([]) | selectattr('name', 'eq', 'byoc')|first).value | default(false))
 
     - name: Set fact for secretStore backend
       ansible.builtin.set_fact:
