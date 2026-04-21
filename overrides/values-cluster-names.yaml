@@ -13,7 +13,7 @@ clusterOverrides:
         name: oa-rdr-primary
       platform:
         aws:
-          region: us-west-1
+          region: ca-central-1
   secondary:
     name: oa-rdr-secondary
     version: 4.20.14
