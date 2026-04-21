@@ -109,8 +109,8 @@ main() {
     done
     
     # For the specific clusters in your configuration (set PRIMARY_CLUSTER/SECONDARY_CLUSTER to match values.yaml)
-    PRIMARY_CLUSTER="${PRIMARY_CLUSTER:-ocp-primary}"
-    SECONDARY_CLUSTER="${SECONDARY_CLUSTER:-ocp-secondary}"
+    PRIMARY_CLUSTER="${PRIMARY_CLUSTER:-oa-rdr-primary}"
+    SECONDARY_CLUSTER="${SECONDARY_CLUSTER:-oa-rdr-secondary}"
     echo ""
     echo "CA certificate extraction completed."
     echo "Certificates are stored in: $CA_OUTPUT_DIR"
