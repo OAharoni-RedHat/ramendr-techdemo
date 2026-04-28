@@ -2,3 +2,4 @@
 agof:
   iac_repo: https://github.com/OAharoni-RedHat/rhvp.agof_ramendr_techdemo_config.git
   iac_revision: main
+  vaultFileKey: secret/data/hub/agof-vault-file
