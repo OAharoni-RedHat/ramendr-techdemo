@@ -1,5 +1,7 @@
 ---
 agof:
-  iac_repo: https://github.com/OAharoni-RedHat/rhvp.agof_ramendr_techdemo_config.git
+  iac_repo: https://github.com/OAharoni-RedHat/ramendr-techdemo-config-as-code.git
   iac_revision: main
-  vaultFileKey: secret/data/hub/agof-vault-file
+  # Use in-cluster hub Vault (doAutoHubVaultConfig); agof_vault.yml stays empty.
+  vaultFileKey: ""
+  doAutoHubVaultConfig: true

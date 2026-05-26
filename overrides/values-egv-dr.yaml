@@ -78,4 +78,3 @@ externalDataSources:
 registryCredentialExternalSecrets:
   windows:
     vaultKey: secret/data/global/privatevm-credentials
-
