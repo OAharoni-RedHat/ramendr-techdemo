@@ -154,6 +154,8 @@ clusterGroup:
         # These resources are created by OCM operators and should never be pruned
         - group: internal.open-cluster-management.io
           kind: ManagedClusterInfo
+      ansible:
+        verbosity: "3"
 
     vault:
       name: vault
