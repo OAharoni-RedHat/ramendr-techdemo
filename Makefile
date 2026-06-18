@@ -10,3 +10,24 @@ install-byoc: ramen-prereq pattern-install ## Installs the pattern onto a cluste
 ramen-prereq: ## Check if values.byoc false do nothing, else run the precheck agains clusters accessed from values-secrets
 	echo "Running precheck for ramendr"
 	cd ansible && ansible-playbook -i hosts $(EXTRA_ARGS) $(EXTRA_VARS) playbooks/validate_byoc.yml
+
+# Storage provider targets
+# The base pattern (make install) deploys without any storage-provider-specific
+# components.  Use one of the targets below to apply a storage overlay before
+# installing.  The merged values files should be committed and pushed to git
+# so the Validated Patterns operator can reconcile them.
+
+.PHONY: apply-storage-odf
+apply-storage-odf: ## Apply ODF/Ceph storage overlay (idempotent — skips if already applied)
+	cd ansible && ansible-playbook -i localhost, -c local $(EXTRA_ARGS) $(EXTRA_VARS) \
+		playbooks/apply_storage_overlay.yml \
+		-e "pattern_dir=$(CURDIR)"
+
+.PHONY: install-odf
+install-odf: apply-storage-odf install ## Apply ODF/Ceph storage overlay and install the pattern
+
+.PHONY: install-dell
+install-dell: ## [STUB] Apply Dell storage overlay and install the pattern
+	@echo "Dell storage overlay not yet implemented."
+	@echo "Create overrides/values-storage-dell.yaml with hub/resilient/egvDr/consolePluginsHub/consolePluginsSpokes"
+	@echo "sections (same structure as overrides/values-storage-odf.yaml), then add an apply-storage-dell target."

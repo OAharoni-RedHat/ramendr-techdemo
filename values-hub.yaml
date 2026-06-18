@@ -2,18 +2,19 @@
 clusterGroup:
   name: hub
   isHubCluster: true
+  # Namespaces as a dictionary — keys are namespace names, enabling clean
+  # map-merge from storage overlay files without list duplication issues.
   namespaces:
-    - open-cluster-management
-    - open-cluster-management-observability
-    - vault
-    - golang-external-secrets
-    - regional-dr
-    - openshift-dr-system
-    - openshift-dr-ops
-    - openshift-storage
-    - policies
-    - aap-config
-    - ansible-automation-platform
+    open-cluster-management:
+    open-cluster-management-observability:
+    vault:
+    golang-external-secrets:
+    regional-dr:
+    openshift-dr-system:
+    openshift-dr-ops:
+    policies:
+    aap-config:
+    ansible-automation-platform:
   subscriptions:
     aap-operator:
       name: ansible-automation-platform-operator
@@ -25,40 +26,15 @@ clusterGroup:
       namespace: open-cluster-management
       channel: release-2.15
 
-    odf-multicluster-orchestrator:
-      name: odf-multicluster-orchestrator
-      namespace: openshift-operators
-
-    openshift-data-foundation:
-      name: odf-operator
-      namespace: openshift-storage
-
   argoCD:
     resourceTrackingMethod: annotation
 
   projects:
     - hub
     - opp
-  # Explicitly mention the cluster-state based overrides we plan to use for this pattern.
-  # We can use self-referential variables because the chart calls the tpl function with these variables defined
   sharedValueFiles:
     - '/overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
-  # sharedValueFiles is a flexible mechanism that will add the listed valuefiles to every app defined in the
-  # applications section. We intend this to supplement and possibly even replace previous "magic" mechanisms, though
-  # we do not at present have a target date for removal.
-  #
-  # To replicate the "classic" magic include structure, the clusterGroup would need all of these
-  # sharedValueFiles, in this order:
-  #   - '/overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
-  #   - '/overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml'
-  #   - '/overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.clusterGroup.name }}.yaml'
-  #   - '/overrides/values-{{ $.Values.global.clusterVersion }}-{{ $.Values.clusterGroup.name }}.yaml"
-  #   - '/overrides/values-{{ $.Values.global.localClusterName }}.yaml'
 
-  # This kind of variable substitution will work with any of the variables the Validated Patterns operator knows
-  # about and sets, so this is also possible, for example:
-  #   - '/overrides/values-{{ $.Values.global.hubClusterDomain }}.yaml'
-  #   - '/overrides/values-{{ $.Values.global.localClusterDomain }}.yaml'
   applications:
     aap:
       name: ansible-automation-platform
@@ -99,8 +75,8 @@ clusterGroup:
       name: opp-policy
       namespace: openshift
       project: opp
-      repoURL: https://github.com/validatedpatterns/opp-policy-chart.git
-      chartVersion: main
+      repoURL: https://github.com/OAharoni-RedHat/opp-policy-chart.git
+      chartVersion: dell-prep
       path: "."
       annotations:
         argocd.argoproj.io/sync-wave: "5"
@@ -131,13 +107,12 @@ clusterGroup:
       namespace: regional-dr
       project: opp
       repoURL: https://github.com/OAharoni-RedHat/regionaldr-with-virt-chart.git
-      chartVersion: main
+      chartVersion: dell-prep
       path: "."
       annotations:
         argocd.argoproj.io/sync-wave: "10"
       syncPolicy:
         automated: {}
-        # We have to wait for the clusters to build, whcih can take a long time
         retry:
           limit: 60
           backoff:
@@ -150,13 +125,12 @@ clusterGroup:
         - '/overrides/values-cluster-names.yaml'
         - '/overrides/values-egv-dr.yaml'
       ignoreDifferences:
-        # Prevent ArgoCD from pruning dynamically created OCM resources
-        # These resources are created by OCM operators and should never be pruned
         - group: internal.open-cluster-management.io
           kind: ManagedClusterInfo
       overrides:
         - name: ansible.verbosity
           value: "3"
+
     vault:
       name: vault
       namespace: vault
@@ -170,15 +144,6 @@ clusterGroup:
       project: hub
       chart: golang-external-secrets
       chartVersion: 0.2.*
-
-    odf:
-      name: odf
-      namespace: openshift-storage
-      project: opp
-      chart: openshift-data-foundations
-      chartVersion: 0.2.*
-      extraValueFiles:
-        - '$patternref/overrides/values-odf-chart.yaml'
 
   imperative:
     verbosity: "-vvv"
