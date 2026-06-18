@@ -1,160 +1,164 @@
 ---
 clusterGroup:
-  name: hub
-  isHubCluster: true
-  # Namespaces as a dictionary — keys are namespace names, enabling clean
-  # map-merge from storage overlay files without list duplication issues.
-  namespaces:
-    open-cluster-management:
-    open-cluster-management-observability:
-    vault:
-    golang-external-secrets:
-    regional-dr:
-    openshift-dr-system:
-    openshift-dr-ops:
-    policies:
-    aap-config:
-    ansible-automation-platform:
-  subscriptions:
-    aap-operator:
-      name: ansible-automation-platform-operator
-      namespace: ansible-automation-platform
-      channel: stable-2.6
-
-    acm:
-      name: advanced-cluster-management
-      namespace: open-cluster-management
-      channel: release-2.15
-
-  argoCD:
-    resourceTrackingMethod: annotation
-
-  projects:
-    - hub
-    - opp
-  sharedValueFiles:
-    - '/overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
-
   applications:
     aap:
+      chart: ansible-automation-platform-instance
+      chartVersion: 0.1.*
       name: ansible-automation-platform
       namespace: ansible-automation-platform
       project: hub
-      chart: ansible-automation-platform-instance
-      chartVersion: 0.1.*
-
     aap-config:
-      name: aap-config
-      namespace: aap-config
-      project: hub
       chart: aap-config
       chartVersion: 0.2.*
       extraValueFiles:
-        - $patternref/overrides/values-aap-config-rdr.yaml
-
-    acm:
-      name: acm
-      namespace: open-cluster-management
+      - $patternref/overrides/values-aap-config-rdr.yaml
+      name: aap-config
+      namespace: aap-config
       project: hub
+    acm:
       chart: acm
       chartVersion: 0.1.*
       ignoreDifferences:
-        - group: internal.open-cluster-management.io
-          kind: ManagedClusterInfo
-
+      - group: internal.open-cluster-management.io
+        kind: ManagedClusterInfo
+      name: acm
+      namespace: open-cluster-management
+      project: hub
     ensure-openshift-console-plugins:
-      name: ensure-openshift-console-plugins
-      namespace: openshift-console
-      project: opp
       chart: ensure-openshift-console-plugins
       chartVersion: 0.1.*
       extraValueFiles:
-        - '$patternref/overrides/values-console-plugins-hub.yaml'
-
-    opp-policy:
-      name: opp-policy
-      namespace: openshift
+      - $patternref/overrides/values-console-plugins-hub.yaml
+      name: ensure-openshift-console-plugins
+      namespace: openshift-console
       project: opp
-      repoURL: https://github.com/OAharoni-RedHat/opp-policy-chart.git
-      chartVersion: dell-prep
-      path: "."
-      annotations:
-        argocd.argoproj.io/sync-wave: "5"
-      syncPolicy:
-        automated: {}
-        retry:
-          limit: 20
-          backoff:
-            duration: 5s
-            factor: 2
-            maxDuration: 3m
-        syncOptions:
-          - syncTimeout=3600s
-          - CreateNamespace=true
-          - PrunePropagationPolicy=foreground
-          - RespectIgnoreDifferences=true
-          - ServerSideApply=true
-      extraValueFiles:
-        - '/overrides/values-cluster-names.yaml'
-      ignoreDifferences:
-      - group: operators.openshift.io
-        kind: Console
-        jsonPointers:
-          - /spec/plugins
-
-    rdr:
-      name: regional-dr
-      namespace: regional-dr
-      project: opp
-      repoURL: https://github.com/OAharoni-RedHat/regionaldr-with-virt-chart.git
-      chartVersion: dell-prep
-      path: "."
-      annotations:
-        argocd.argoproj.io/sync-wave: "10"
-      syncPolicy:
-        automated: {}
-        retry:
-          limit: 60
-          backoff:
-            duration: 5s
-            factor: 2
-            maxDuration: 3m
-        syncOptions:
-          - RespectIgnoreDifferences=true
-      extraValueFiles:
-        - '/overrides/values-cluster-names.yaml'
-        - '/overrides/values-egv-dr.yaml'
-      ignoreDifferences:
-        - group: internal.open-cluster-management.io
-          kind: ManagedClusterInfo
-      overrides:
-        - name: ansible.verbosity
-          value: "3"
-
-    vault:
-      name: vault
-      namespace: vault
-      project: hub
-      chart: hashicorp-vault
-      chartVersion: 0.1.*
-
     golang-external-secrets:
+      chart: golang-external-secrets
+      chartVersion: 0.2.*
       name: golang-external-secrets
       namespace: golang-external-secrets
       project: hub
-      chart: golang-external-secrets
+    odf:
+      chart: openshift-data-foundations
       chartVersion: 0.2.*
-
+      extraValueFiles:
+      - $patternref/overrides/values-odf-chart.yaml
+      name: odf
+      namespace: openshift-storage
+      project: opp
+      syncOptions:
+      - CreateNamespace=true
+    opp-policy:
+      annotations:
+        argocd.argoproj.io/sync-wave: '5'
+      chartVersion: dell-prep
+      extraValueFiles:
+      - /overrides/values-cluster-names.yaml
+      - $patternref/overrides/values-storage-odf.yaml
+      ignoreDifferences:
+      - group: operators.openshift.io
+        jsonPointers:
+        - /spec/plugins
+        kind: Console
+      name: opp-policy
+      namespace: openshift
+      path: .
+      project: opp
+      repoURL: https://github.com/OAharoni-RedHat/opp-policy-chart.git
+      syncPolicy:
+        automated: {}
+        retry:
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m
+          limit: 20
+        syncOptions:
+        - syncTimeout=3600s
+        - CreateNamespace=true
+        - PrunePropagationPolicy=foreground
+        - RespectIgnoreDifferences=true
+        - ServerSideApply=true
+    rdr:
+      annotations:
+        argocd.argoproj.io/sync-wave: '10'
+      chartVersion: dell-prep
+      extraValueFiles:
+      - /overrides/values-cluster-names.yaml
+      - /overrides/values-egv-dr.yaml
+      - $patternref/overrides/values-storage-odf.yaml
+      ignoreDifferences:
+      - group: internal.open-cluster-management.io
+        kind: ManagedClusterInfo
+      name: regional-dr
+      namespace: regional-dr
+      overrides:
+      - name: ansible.verbosity
+        value: '3'
+      path: .
+      project: opp
+      repoURL: https://github.com/OAharoni-RedHat/regionaldr-with-virt-chart.git
+      syncPolicy:
+        automated: {}
+        retry:
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m
+          limit: 60
+        syncOptions:
+        - RespectIgnoreDifferences=true
+    vault:
+      chart: hashicorp-vault
+      chartVersion: 0.1.*
+      name: vault
+      namespace: vault
+      project: hub
+  argoCD:
+    resourceTrackingMethod: annotation
   imperative:
-    verbosity: "-vvv"
     jobs: []
-
+    verbosity: -vvv
+  isHubCluster: true
   managedClusterGroups:
     resilient:
-      name: resilient
-      helmOverrides:
-        - name: clusterGroup.isHubCluster
-          value: "false"
       acmlabels:
-        - name: clusterGroup
-          value: resilient
+      - name: clusterGroup
+        value: resilient
+      helmOverrides:
+      - name: clusterGroup.isHubCluster
+        value: 'false'
+      name: resilient
+  name: hub
+  namespaces:
+    aap-config: null
+    ansible-automation-platform: null
+    golang-external-secrets: null
+    open-cluster-management: null
+    open-cluster-management-observability: null
+    openshift-dr-ops: null
+    openshift-dr-system: null
+    openshift-storage: null
+    policies: null
+    regional-dr: null
+    vault: null
+  projects:
+  - hub
+  - opp
+  sharedValueFiles:
+  - /overrides/values-{{ $.Values.global.clusterPlatform }}.yaml
+  subscriptions:
+    aap-operator:
+      channel: stable-2.6
+      name: ansible-automation-platform-operator
+      namespace: ansible-automation-platform
+    acm:
+      channel: release-2.15
+      name: advanced-cluster-management
+      namespace: open-cluster-management
+    odf-multicluster-orchestrator:
+      name: odf-multicluster-orchestrator
+      namespace: openshift-operators
+    openshift-data-foundation:
+      name: odf-operator
+      namespace: openshift-storage
