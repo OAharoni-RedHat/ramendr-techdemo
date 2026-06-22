@@ -24,7 +24,22 @@ apply-storage-odf: ## Apply ODF/Ceph storage overlay (idempotent — skips if al
 		-e "pattern_dir=$(CURDIR)"
 
 .PHONY: install-odf
-install-odf: apply-storage-odf install ## Apply ODF/Ceph storage overlay and install the pattern
+install-odf: apply-storage-odf ## Apply ODF/Ceph storage overlay and print next steps
+	@echo ""
+	@echo "ODF storage overlay applied to the following files:"
+	@echo "  values-hub.yaml"
+	@echo "  values-resilient.yaml"
+	@echo "  overrides/values-egv-dr.yaml"
+	@echo "  overrides/values-console-plugins-hub.yaml"
+	@echo "  overrides/values-console-plugins-spokes.yaml"
+	@echo ""
+	@echo "Next steps:"
+	@echo "  1. Review the changes:        git diff"
+	@echo "  2. Commit the overlay:        git add -u && git commit -m 'Apply ODF storage overlay'"
+	@echo "  3. Push to your fork:         git push"
+	@echo "  4. Load secrets onto cluster: ./pattern.sh make load-secrets"
+	@echo "  5. Deploy the pattern:        ./pattern.sh make install"
+	@echo ""
 
 .PHONY: install-dell
 install-dell: ## [STUB] Apply Dell storage overlay and install the pattern
