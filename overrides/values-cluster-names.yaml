@@ -14,7 +14,7 @@ global:
 clusterOverrides:
   primary:
     name: oa-rdr-primary
-    version: 4.22.0
+    version: 4.22.1
     install_config:
       metadata:
         name: oa-rdr-primary
@@ -23,7 +23,7 @@ clusterOverrides:
           region: ca-central-1
   secondary:
     name: oa-rdr-secondary
-    version: 4.22.0
+    version: 4.22.1
     install_config:
       metadata:
         name: oa-rdr-secondary
