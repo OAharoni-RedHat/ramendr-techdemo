@@ -105,7 +105,8 @@ clusterGroup:
       namespace: openshift
       argoProject: opp
       chart: opp-policy-chart
-      chartVersion: 0.0.*      annotations:
+      chartVersion: 0.0.*      
+      annotations:
         argocd.argoproj.io/sync-wave: "5"
       syncPolicy:
         automated: {}
