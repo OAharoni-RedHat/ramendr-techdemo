@@ -3,17 +3,17 @@ clusterGroup:
   name: hub
   isHubCluster: true
   namespaces:
-    - open-cluster-management
-    - open-cluster-management-observability
-    - vault
-    - golang-external-secrets
-    - regional-dr
-    - openshift-dr-system
-    - openshift-dr-ops
-    - openshift-storage
-    - policies
-    - aap-config
-    - ansible-automation-platform
+    open-cluster-management: {}
+    open-cluster-management-observability: {}
+    vault: {}
+    regional-dr: {}
+    openshift-dr-system: {}
+    openshift-dr-ops: {}
+    openshift-storage: {}
+    policies: {}
+    aap-config: {}
+    ansible-automation-platform: {}
+
   subscriptions:
     aap-operator:
       name: ansible-automation-platform-operator
@@ -23,7 +23,12 @@ clusterGroup:
     acm:
       name: advanced-cluster-management
       namespace: open-cluster-management
-      channel: release-2.15
+      channel: release-2.17
+
+    eso:
+      name: openshift-external-secrets-operator
+      namespace: external-secrets-operator
+      channel: stable-v1
 
     odf-multicluster-orchestrator:
       name: odf-multicluster-orchestrator
@@ -36,7 +41,7 @@ clusterGroup:
   argoCD:
     resourceTrackingMethod: annotation
 
-  projects:
+  argoProjects:
     - hub
     - opp
   # Explicitly mention the cluster-state based overrides we plan to use for this pattern.
@@ -63,14 +68,14 @@ clusterGroup:
     aap:
       name: ansible-automation-platform
       namespace: ansible-automation-platform
-      project: hub
+      argoProject: hub
       chart: ansible-automation-platform-instance
       chartVersion: 0.1.*
 
     aap-config:
       name: aap-config
       namespace: aap-config
-      project: hub
+      argoProject: hub
       chart: aap-config
       chartVersion: 0.2.*
       extraValueFiles:
@@ -79,7 +84,7 @@ clusterGroup:
     acm:
       name: acm
       namespace: open-cluster-management
-      project: hub
+      argoProject: hub
       chart: acm
       chartVersion: 0.1.*
       ignoreDifferences:
@@ -89,7 +94,7 @@ clusterGroup:
     ensure-openshift-console-plugins:
       name: ensure-openshift-console-plugins
       namespace: openshift-console
-      project: opp
+      argoProject: opp
       chart: ensure-openshift-console-plugins
       chartVersion: 0.1.*
       extraValueFiles:
@@ -98,11 +103,9 @@ clusterGroup:
     opp-policy:
       name: opp-policy
       namespace: openshift
-      project: opp
-      repoURL: https://github.com/validatedpatterns/opp-policy-chart.git
-      chartVersion: main
-      path: "."
-      annotations:
+      argoProject: opp
+      chart: opp-policy-chart
+      chartVersion: 0.0.*      annotations:
         argocd.argoproj.io/sync-wave: "5"
       syncPolicy:
         automated: {}
@@ -129,10 +132,9 @@ clusterGroup:
     rdr:
       name: regional-dr
       namespace: regional-dr
-      project: opp
-      repoURL: https://github.com/validatedpatterns/regionaldr-with-virt-chart.git
-      chartVersion: main
-      path: "."
+      argoProject: opp
+      chart: regionaldr-with-virt
+      chartVersion: 0.0.*
       annotations:
         argocd.argoproj.io/sync-wave: "10"
       syncPolicy:
@@ -158,21 +160,21 @@ clusterGroup:
     vault:
       name: vault
       namespace: vault
-      project: hub
+      argoProject: hub
       chart: hashicorp-vault
       chartVersion: 0.1.*
 
-    golang-external-secrets:
-      name: golang-external-secrets
-      namespace: golang-external-secrets
-      project: hub
-      chart: golang-external-secrets
-      chartVersion: 0.2.*
+    openshift-external-secrets:
+      name: openshift-external-secrets
+      namespace: openshift-external-secrets
+      argoProject: opp
+      chart: openshift-external-secrets
+      chartVersion: 0.0.*
 
     odf:
       name: odf
       namespace: openshift-storage
-      project: opp
+      argoProject: opp
       chart: openshift-data-foundations
       chartVersion: 0.2.*
       extraValueFiles:
