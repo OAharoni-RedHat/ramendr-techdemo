@@ -1,4 +1,11 @@
 ---
+# Global values forwarded by Helm to all subcharts (odf subchart in opp-policy-chart
+# and regionaldr-with-virt-chart). Must match the ACM ManagedCluster names.
+global:
+  primaryClusterName: oa-rdr-primary
+  secondaryClusterName: oa-rdr-secondary
+  clusterSetName: resilient
+
 # Minimal override for DR cluster names, versions, and regions.
 # This file is applied after chart defaults (override merged last). It only contains overlay keys
 # (clusterOverrides, drpc) so chart regionalDR defaults are preserved.
@@ -6,30 +13,32 @@
 
 clusterOverrides:
   primary:
-    name: ocp-primary
+    name: oa-rdr-primary
     version: 4.22.1
     install_config:
       metadata:
-        name: ocp-primary
+        name: oa-rdr-primary
       platform:
         aws:
-          region: us-west-1
+          region: ca-central-1
   secondary:
-    name: ocp-secondary
+    name: oa-rdr-secondary
     version: 4.22.1
     install_config:
       metadata:
-        name: ocp-secondary
+        name: oa-rdr-secondary
       platform:
         aws:
           region: us-east-1
 
-# DRPC preferredCluster must be the ACM ManagedCluster name (ocp-primary), not the
-# install_config.metadata.name (mhj-ocp-422-p). Ramen uses this to target ManifestWork.drpc:
-  preferredCluster: ocp-primary
-  protectedNamespaces:
-    - gitops-vms
-    - boutique
+# DRPC overrides — scoped under rdr-odf so they reach the rdr-odf subchart.
+# (Top-level drpc: is no longer read after DRPC templates moved into the subchart.)
+rdr-odf:
+  drpc:
+    preferredCluster: oa-rdr-primary
+    protectedNamespaces:
+      - gitops-vms
+      - boutique
 
 # Set this to "true", provision clusters, and add their kubeconfigs
 # as described in the values-secret template; then run

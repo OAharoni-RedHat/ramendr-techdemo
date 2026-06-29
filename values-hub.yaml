@@ -104,8 +104,9 @@ clusterGroup:
       name: opp-policy
       namespace: openshift
       argoProject: opp
-      chart: opp-policy-chart
-      chartVersion: 0.0.*      
+      repoURL: https://github.com/OAharoni-RedHat/opp-policy-chart.git
+      targetRevision: dell-prep-real
+      path: .
       annotations:
         argocd.argoproj.io/sync-wave: "5"
       syncPolicy:
@@ -124,6 +125,7 @@ clusterGroup:
           - ServerSideApply=true
       extraValueFiles:
         - '/overrides/values-cluster-names.yaml'
+        - '$patternref/overrides/values-storage-odf.yaml'
       ignoreDifferences:
       - group: operators.openshift.io
         kind: Console
@@ -134,8 +136,9 @@ clusterGroup:
       name: regional-dr
       namespace: regional-dr
       argoProject: opp
-      chart: regionaldr-with-virt
-      chartVersion: 0.0.*
+      repoURL: https://github.com/OAharoni-RedHat/opp-policy-chart.git
+      targetRevision: dell-prep-real
+      path: .
       annotations:
         argocd.argoproj.io/sync-wave: "10"
       syncPolicy:
@@ -152,6 +155,7 @@ clusterGroup:
       extraValueFiles:
         - '/overrides/values-cluster-names.yaml'
         - '/overrides/values-egv-dr.yaml'
+        - '$patternref/overrides/values-storage-odf.yaml'
       ignoreDifferences:
         # Prevent ArgoCD from pruning dynamically created OCM resources
         # These resources are created by OCM operators and should never be pruned

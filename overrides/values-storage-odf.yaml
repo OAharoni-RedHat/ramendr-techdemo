@@ -1,0 +1,6 @@
+---
+# ODF enablement flag. Setting this to true activates the opp-odf and rdr-odf subcharts
+# in opp-policy-chart and regionaldr-with-virt-chart respectively (condition: odf.enabled).
+odf:
+  enabled: true
+  postInstallFixesEnabled: true
