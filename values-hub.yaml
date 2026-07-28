@@ -149,7 +149,7 @@ clusterGroup:
       namespace: vp-manage-proxy-cluster-ca
       argoProject: hub
       chart: vp-manage-proxy-cluster-ca
-      chartVersion: 0.0.*
+      chartVersion: 0.2.*
       extraValueFiles:
         - $patternref/overrides/values-vp-manage-proxy-cluster-ca-hub.yaml
       annotations:
